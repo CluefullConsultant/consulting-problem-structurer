@@ -238,33 +238,46 @@ if st.session_state.auto_run:
 
 # ── Analysis ──────────────────────────────────────────────────
 if run and problem.strip():
-    with st.spinner("Analyzing with Claude..."):
-        try:
-            api_key = st.secrets.get("ANTHROPIC_API_KEY", None) if hasattr(st, "secrets") else None
-            client = anthropic.Anthropic(api_key=api_key)
+    try:
+        api_key = st.secrets.get("ANTHROPIC_API_KEY", None) if hasattr(st, "secrets") else None
+        client = anthropic.Anthropic(api_key=api_key)
 
-            response = client.messages.create(
-                model="claude-sonnet-4-5",
-                max_tokens=2048,
-                system=SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": f"Client problem statement:\n\n{problem}"}]
-            )
+        stream_box = st.empty()
+        raw = ""
 
-            raw = response.content[0].text.strip()
-            if raw.startswith("```"):
-                raw = raw.split("```")[1]
-                if raw.startswith("json"):
-                    raw = raw[4:]
-                raw = raw.strip()
+        with client.messages.stream(
+            model="claude-sonnet-4-5",
+            max_tokens=2048,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": f"Client problem statement:\n\n{problem}"}]
+        ) as stream:
+            for text in stream.text_stream:
+                raw += text
+                stream_box.markdown(
+                    f'<div style="font-family:monospace;font-size:0.78rem;color:#6b7280;'
+                    f'background:#f9fafb;padding:1rem 1.25rem;border-radius:8px;'
+                    f'border:1px solid #e5e7eb;white-space:pre-wrap;line-height:1.6;">'
+                    f'{raw}▌</div>',
+                    unsafe_allow_html=True
+                )
+            final_message = stream.get_final_message()
 
-            data = json.loads(raw)
+        stream_box.empty()
 
-        except json.JSONDecodeError as e:
-            st.error(f"Claude returned unexpected output. Try again. ({e})")
-            st.stop()
-        except Exception as e:
-            st.error(f"Something went wrong: {e}")
-            st.stop()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
+
+        data = json.loads(raw)
+
+    except json.JSONDecodeError as e:
+        st.error(f"Claude returned unexpected output. Try again. ({e})")
+        st.stop()
+    except Exception as e:
+        st.error(f"Something went wrong: {e}")
+        st.stop()
 
     # ── Classification ────────────────────────────────────────
     st.markdown('<hr class="thin-divider">', unsafe_allow_html=True)
@@ -354,7 +367,7 @@ if run and problem.strip():
     dl_col, token_col = st.columns([1, 3])
     dl_col.download_button("⬇ Download brief", data=brief_text, file_name=filepath.name, mime="text/markdown")
     token_col.markdown(
-        f'<div class="token-info">{response.usage.input_tokens} tokens in · {response.usage.output_tokens} out · '
+        f'<div class="token-info">{final_message.usage.input_tokens} tokens in · {final_message.usage.output_tokens} out · '
         f'{datetime.now().strftime("%d %b %Y, %H:%M")}</div>',
         unsafe_allow_html=True
     )
