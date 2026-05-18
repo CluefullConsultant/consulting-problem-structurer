@@ -191,8 +191,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Session state ─────────────────────────────────────────────
-if "problem_text" not in st.session_state:
-    st.session_state.problem_text = ""
+if "problem_input" not in st.session_state:
+    st.session_state.problem_input = ""
 if "auto_run" not in st.session_state:
     st.session_state.auto_run = False
 
@@ -203,24 +203,25 @@ EXAMPLES = {
     "Revenue plateau": "We hit €2M ARR last year and haven't moved since. Sales says the product is missing features. Product says sales is targeting the wrong customers. Meanwhile we're burning €180k a month and have 9 months of runway.",
 }
 
-st.markdown('<div class="example-label">Try an example (auto-runs):</div>', unsafe_allow_html=True)
+def load_example(text):
+    st.session_state.problem_input = text
+    st.session_state.auto_run = True
+
+st.markdown('<div class="example-label">Try an example (click to auto-run):</div>', unsafe_allow_html=True)
 ex_cols = st.columns(len(EXAMPLES))
 for col, (label, text) in zip(ex_cols, EXAMPLES.items()):
-    if col.button(label, use_container_width=True):
-        st.session_state.problem_text = text
-        st.session_state.auto_run = True
+    col.button(label, use_container_width=True, on_click=load_example, args=(text,))
 
 # ── Input ─────────────────────────────────────────────────────
+# key="problem_input" lets Streamlit sync the widget with session state automatically.
+# Do NOT pass value= alongside key= — they conflict and value= gets ignored.
 problem = st.text_area(
     "Client problem statement",
-    value=st.session_state.problem_text,
     placeholder='Type or paste what the client says. Messy, emotional, incomplete is fine. That\'s what this tool is for.',
     height=130,
     label_visibility="collapsed",
     key="problem_input"
 )
-# Keep session state in sync when user types manually
-st.session_state.problem_text = problem
 
 col_btn, col_tip = st.columns([1, 4])
 run_clicked = col_btn.button("Structure →", type="primary", disabled=not bool(problem.strip()))
@@ -230,10 +231,10 @@ col_tip.markdown(
     unsafe_allow_html=True
 )
 
-# Fire if button clicked OR if an example was just selected
+# Fire if button clicked OR triggered by example selection
 run = run_clicked or st.session_state.auto_run
 if st.session_state.auto_run:
-    st.session_state.auto_run = False  # reset so it doesn't loop
+    st.session_state.auto_run = False
 
 # ── Analysis ──────────────────────────────────────────────────
 if run and problem.strip():
