@@ -190,6 +190,12 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# ── Session state ─────────────────────────────────────────────
+if "problem_text" not in st.session_state:
+    st.session_state.problem_text = ""
+if "auto_run" not in st.session_state:
+    st.session_state.auto_run = False
+
 # ── Example problems ──────────────────────────────────────────
 EXAMPLES = {
     "CTO/CPO conflict": "Our engineering and product teams are constantly misaligned. We ship things the customers don't want, and by the time we realise it, we've lost two sprints. The CTO and CPO are barely talking. I need someone to fix this before our Series B due diligence.",
@@ -197,30 +203,37 @@ EXAMPLES = {
     "Revenue plateau": "We hit €2M ARR last year and haven't moved since. Sales says the product is missing features. Product says sales is targeting the wrong customers. Meanwhile we're burning €180k a month and have 9 months of runway.",
 }
 
-st.markdown('<div class="example-label">Try an example →</div>', unsafe_allow_html=True)
+st.markdown('<div class="example-label">Try an example (auto-runs):</div>', unsafe_allow_html=True)
 ex_cols = st.columns(len(EXAMPLES))
-selected_example = None
 for col, (label, text) in zip(ex_cols, EXAMPLES.items()):
     if col.button(label, use_container_width=True):
-        selected_example = text
+        st.session_state.problem_text = text
+        st.session_state.auto_run = True
 
 # ── Input ─────────────────────────────────────────────────────
-default_text = selected_example if selected_example else ""
 problem = st.text_area(
     "Client problem statement",
-    value=default_text,
+    value=st.session_state.problem_text,
     placeholder='Type or paste what the client says. Messy, emotional, incomplete is fine. That\'s what this tool is for.',
     height=130,
-    label_visibility="collapsed"
+    label_visibility="collapsed",
+    key="problem_input"
 )
+# Keep session state in sync when user types manually
+st.session_state.problem_text = problem
 
 col_btn, col_tip = st.columns([1, 4])
-run = col_btn.button("Structure →", type="primary", disabled=not bool(problem.strip()))
+run_clicked = col_btn.button("Structure →", type="primary", disabled=not bool(problem.strip()))
 col_tip.markdown(
     '<span style="color:#9ca3af;font-size:0.82rem;line-height:3rem;">'
     'Works best with real, unfiltered language from the client.</span>',
     unsafe_allow_html=True
 )
+
+# Fire if button clicked OR if an example was just selected
+run = run_clicked or st.session_state.auto_run
+if st.session_state.auto_run:
+    st.session_state.auto_run = False  # reset so it doesn't loop
 
 # ── Analysis ──────────────────────────────────────────────────
 if run and problem.strip():
