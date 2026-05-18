@@ -1,5 +1,5 @@
 """
-Consulting Problem Structurer — Web Interface
+Consulting Problem Structurer - Web Interface
 Run with: python -m streamlit run app.py
 """
 
@@ -184,8 +184,8 @@ st.markdown("""
     <div class="hero-title">Consulting Problem Structurer</div>
     <div class="hero-subtitle">
         Paste what a client says in the first five minutes of a call.
-        Get a structured diagnostic brief — hypothesis tree, MECE issue breakdown,
-        and first-meeting questions — in seconds.
+        Get a structured diagnostic brief: hypothesis tree, MECE issue breakdown,
+        and first-meeting questions, in seconds.
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -209,7 +209,7 @@ default_text = selected_example if selected_example else ""
 problem = st.text_area(
     "Client problem statement",
     value=default_text,
-    placeholder='Type or paste what the client says — messy, emotional, incomplete is fine. That\'s what this tool is for.',
+    placeholder='Type or paste what the client says. Messy, emotional, incomplete is fine. That\'s what this tool is for.',
     height=130,
     label_visibility="collapsed"
 )

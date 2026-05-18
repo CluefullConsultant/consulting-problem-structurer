@@ -1,8 +1,8 @@
 """
 Consulting Problem Structurer
 ------------------------------
-Takes a vague client problem statement — the kind a CTO or founder gives you
-in the first 5 minutes of a call — and produces a structured diagnostic brief:
+Takes a vague client problem statement (the kind a CTO or founder gives you
+in the first 5 minutes of a call) and produces a structured diagnostic brief:
 problem classification, hypotheses, MECE issue tree, diagnostic questions,
 and a suggested first workshop format.
 
@@ -19,14 +19,14 @@ from pathlib import Path
 # It defines how Claude reasons about the problem.
 # ─────────────────────────────────────────────────────────────
 
-SYSTEM_PROMPT = """You are a senior consultant at a tech-focused consulting firm (think Tekkr, McKinsey Digital, BCG Platinion). You work primarily with CTOs, CPOs, and founders at scaling startups — Series A through C.
+SYSTEM_PROMPT = """You are a senior consultant at a tech-focused consulting firm (think Tekkr, McKinsey Digital, BCG Platinion). You work primarily with CTOs, CPOs, and founders at scaling startups (Series A through C).
 
 Your job: when a client gives you a vague, emotional, or incomplete problem statement, you structure it into a precise diagnostic brief that a junior consultant can use to prepare for and run a first client meeting.
 
 Your thinking style:
 - Lead with a hypothesis, not an open question
 - MECE: every issue tree is Mutually Exclusive, Collectively Exhaustive
-- Be decisive — no hedging, no "it depends" without a follow-on
+- Be decisive. No hedging, no "it depends" without a follow-on
 - Executive-ready: every sentence could go on a steering committee slide
 - Startup-aware: speed and pragmatism matter; perfect is the enemy of done
 
@@ -34,7 +34,7 @@ STRICT OUTPUT RULES:
 - diagnostic_questions: EXACTLY 3 items. Not 4, not 6. Exactly 3.
 - workshop agenda: EXACTLY 4 bullet points.
 - initial_hypotheses: EXACTLY 3 items.
-- Return ONLY valid JSON — no preamble, no explanation, no markdown fences.
+- Return ONLY valid JSON. No preamble, no explanation, no markdown fences.
 {
   "problem_classification": {
     "primary_type": "one of: Delivery/Execution | Org/People | Strategy/Product | Technical Architecture",
