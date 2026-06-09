@@ -6,6 +6,7 @@ Run with: python -m streamlit run app.py
 import streamlit as st
 import anthropic
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 from structurer import SYSTEM_PROMPT, format_brief, save_brief
@@ -264,12 +265,10 @@ if run and problem.strip():
 
         stream_box.empty()
 
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-            raw = raw.strip()
-
+        # Robustly extract JSON -- find the outermost { } block
+        match = re.search(r'\{.*\}', raw, re.DOTALL)
+        if match:
+            raw = match.group()
         data = json.loads(raw)
 
     except json.JSONDecodeError as e:
