@@ -96,6 +96,32 @@ st.markdown("""
     .badge-strategy { background: #dbeafe; color: #1e40af; }
     .badge-tech     { background: #d1fae5; color: #065f46; }
 
+    /* Build approach badge (technical concept) */
+    .badge-approach {
+        display: inline-block;
+        border-radius: 8px;
+        padding: 0.4rem 0.9rem;
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        background: #ede9fe;
+        color: #5b21b6;
+    }
+
+    /* Build signal tag */
+    .tag-signal {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 0.15rem 0.65rem;
+        font-weight: 600;
+        font-size: 0.72rem;
+        margin-left: 0.5rem;
+        vertical-align: middle;
+    }
+    .signal-quick     { background: #dcfce7; color: #166534; }
+    .signal-discovery { background: #fef9c3; color: #854d0e; }
+    .signal-longer    { background: #fee2e2; color: #991b1b; }
+
     /* Section headers */
     .section-label {
         font-size: 0.72rem;
@@ -334,9 +360,9 @@ if run and problem.strip():
             for sub in branch["sub_issues"]:
                 st.markdown(f'<div class="branch-item">· {sub}</div>', unsafe_allow_html=True)
 
-    # ── Workshop + Red flags ───────────────────────────────────
+    # ── Workshop + Technical Concept + Red flags ────────────────
     st.markdown('<hr class="thin-divider">', unsafe_allow_html=True)
-    w_col, r_col = st.columns([1, 1])
+    w_col, tc_col, r_col = st.columns([1, 1, 1])
 
     with w_col:
         ws = data["workshop_suggestion"]
@@ -348,6 +374,26 @@ if run and problem.strip():
             {''.join(f'<div class="branch-item" style="margin-bottom:0.3rem;">· {item}</div>' for item in ws['agenda'])}
             <div style="margin-top:0.75rem;font-size:0.85rem;background:#f0fdf4;border-radius:6px;padding:0.5rem 0.75rem;color:#166534;">
                 <strong>Output:</strong> {ws['key_output']}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with tc_col:
+        tc = data["technical_concept"]
+        signal_class = {
+            "Quick Win":      "signal-quick",
+            "Needs Discovery":"signal-discovery",
+            "Longer Build":   "signal-longer",
+        }.get(tc["build_signal"], "signal-discovery")
+
+        st.markdown(f"""
+        <div class="card">
+            <div class="card-title">Technical Concept</div>
+            <span class="badge-approach">{tc['recommended_approach']}</span>
+            <span class="tag-signal {signal_class}">{tc['build_signal']}</span>
+            {''.join(f'<div class="branch-item" style="margin-bottom:0.3rem;">· {item}</div>' for item in tc['key_components'])}
+            <div style="margin-top:0.75rem;font-size:0.85rem;color:#6b7280;">
+                {tc['feasibility_note']}
             </div>
         </div>
         """, unsafe_allow_html=True)

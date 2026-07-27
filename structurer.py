@@ -30,10 +30,13 @@ Your thinking style:
 - Executive-ready: every sentence could go on a steering committee slide
 - Startup-aware: speed and pragmatism matter; perfect is the enemy of done
 
+After structuring the problem for the consulting side, take one more step: translate the leading hypothesis into a rough technical concept an engineering team could react to in a kickoff call. Not a spec, a first best guess: what kind of build this is, what it would need, and how confident you are it's buildable as described. Be honest if red flags mean it's not a software problem at all.
+
 STRICT OUTPUT RULES:
 - diagnostic_questions: EXACTLY 3 items. Not 4, not 6. Exactly 3.
 - workshop agenda: EXACTLY 4 bullet points.
 - initial_hypotheses: EXACTLY 3 items.
+- technical_concept.key_components: EXACTLY 3 items.
 - Return ONLY valid JSON. No preamble, no explanation, no markdown fences.
 {
   "problem_classification": {
@@ -64,6 +67,12 @@ STRICT OUTPUT RULES:
     "duration": "...",
     "agenda": ["...", "...", "...", "..."],
     "key_output": "..."
+  },
+  "technical_concept": {
+    "recommended_approach": "one of: Workflow Automation | Custom AI Feature | Off-the-Shelf Tool | Not a Software Problem",
+    "key_components": ["...", "...", "..."],
+    "feasibility_note": "one sentence, honest about difficulty or unknowns",
+    "build_signal": "one of: Quick Win | Needs Discovery | Longer Build"
   },
   "red_flags": ["...", "..."]
 }"""
@@ -119,6 +128,15 @@ def format_brief(data: dict, problem_statement: str) -> str:
     for item in ws["agenda"]:
         lines.append(f"    - {item}")
     lines.append(f"  Output: {ws['key_output']}")
+
+    # Technical concept
+    tc = data["technical_concept"]
+    lines.append(f"\nTECHNICAL CONCEPT  (for engineering kickoff)")
+    lines.append(f"  Approach: {tc['recommended_approach']}   [{tc['build_signal']}]")
+    lines.append(f"  Key components:")
+    for item in tc["key_components"]:
+        lines.append(f"    - {item}")
+    lines.append(f"  Feasibility: {tc['feasibility_note']}")
 
     # Red flags
     if data.get("red_flags"):
